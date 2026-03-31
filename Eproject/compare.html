@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Products - FOTOLAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { bg:'#0a0a0a', surface:'#141414', card:'#1a1a1a', border:'#2a2a2a', accent:'#d4a853', accentDark:'#b8923f', muted:'#888888', fg:'#f5f5f5' },
+                    fontFamily: { display:['Bebas Neue','sans-serif'], body:['Inter','sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root { --bg:#0a0a0a;--surface:#141414;--card:#1a1a1a;--border:#2a2a2a;--accent:#d4a853;--accent-dark:#b8923f;--muted:#888888;--fg:#f5f5f5; }
+        * { scrollbar-width:thin; scrollbar-color:var(--accent) var(--surface); }
+        html { scroll-behavior:smooth; }
+        @media (prefers-reduced-motion:reduce) { html{scroll-behavior:auto;} *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;} }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
+        .font-display { font-family:'Bebas Neue',sans-serif; }
+
+        .reveal { opacity:0; transform:translateY(40px); transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1),transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.active { opacity:1; transform:translateY(0); }
+        .reveal-delay-1{transition-delay:0.1s;} .reveal-delay-2{transition-delay:0.2s;} .reveal-delay-3{transition-delay:0.3s;} .reveal-delay-4{transition-delay:0.4s;}
+
+        .btn-primary { background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark) 100%); color:var(--bg); font-weight:600; padding:12px 28px; border-radius:4px; transition:all 0.3s ease; position:relative; overflow:hidden; display:inline-block; text-decoration:none; border:none; cursor:pointer; }
+        .btn-primary::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent); transition:left 0.5s ease; }
+        .btn-primary:hover::before { left:100%; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px -8px var(--accent); }
+
+        .btn-secondary { background:transparent; border:1px solid var(--accent); color:var(--accent); padding:10px 24px; border-radius:4px; transition:all 0.3s ease; display:inline-block; text-decoration:none; cursor:pointer; }
+        .btn-secondary:hover { background:var(--accent); color:var(--bg); }
+
+        .btn-danger { background:transparent; border:1px solid #ef4444; color:#ef4444; padding:10px 24px; border-radius:4px; transition:all 0.3s ease; display:inline-block; cursor:pointer; }
+        .btn-danger:hover { background:#ef4444; color:white; }
+
+        .nav-link { position:relative; padding:8px 0; transition:color 0.3s ease; text-decoration:none; }
+        .nav-link::after { content:''; position:absolute; bottom:0; left:0; width:0; height:2px; background:var(--accent); transition:width 0.3s ease; }
+        .nav-link:hover { color:var(--accent); }
+        .nav-link:hover::after { width:100%; }
+
+        .mobile-menu { transform:translateX(100%); transition:transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+        .mobile-menu.open { transform:translateX(0); }
+
+        .compare-slot {
+            background: var(--card); border: 2px dashed var(--border); border-radius: 12px;
+            min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .compare-slot.filled { border-style: solid; border-color: var(--border); }
+        .compare-slot.filled:hover { border-color: var(--accent); }
+
+        .remove-slot {
+            position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+            background: rgba(239,68,68,0.9); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            opacity: 0; transition: opacity 0.2s ease; z-index: 2;
+        }
+        .compare-slot.filled:hover .remove-slot { opacity: 1; }
+
+        .section-divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+        button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+        .compare-table th, .compare-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+        .compare-table th { background: var(--surface); font-weight: 600; white-space: nowrap; }
+        .compare-table td { text-align: center; }
+        .compare-table td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+        .compare-table tr:last-child td { border-bottom: none; }
+
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-menu {
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+            min-width: 220px; max-height: 300px; overflow-y: auto; display: none; z-index: 10;
+            margin-bottom: 8px; box-shadow: 0 -8px 24px rgba(0,0,0,0.4);
+        }
+        .dropdown-menu.open { display: block; }
+        .dropdown-item {
+            padding: 10px 14px; cursor: pointer; transition: background 0.2s;
+            display: flex; align-items: center; gap: 10px; font-size: 14px;
+        }
+        .dropdown-item:hover { background: rgba(212,168,83,0.1); }
+        .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
+        .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
+    </style>
+</head>
+<body class="min-h-screen pt-16 lg:pt-20">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-bg/90 backdrop-blur-md border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 lg:h-20">
+                <a href="index.html" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-accent rounded flex items-center justify-center"><svg class="w-6 h-6 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                    <span class="font-display text-2xl lg:text-3xl tracking-wider text-fg">FOTOLAB</span>
+                </a>
+                <div class="hidden lg:flex items-center gap-8">
+                    <a href="index.html" class="nav-link text-muted">Home</a>
+                    <a href="products.html" class="nav-link text-muted">Products</a>
+                    <a href="brands.html" class="nav-link text-muted">Brands</a>
+                    <a href="compare.html" class="nav-link text-accent">Compare</a>
+                    <a href="contact.html" class="nav-link text-muted">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="products.html" class="hidden sm:block btn-primary text-sm">Browse Catalog</a>
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 text-fg" aria-label="Toggle menu"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div id="mobileMenu" class="mobile-menu fixed inset-y-0 right-0 w-72 bg-surface z-50 lg:hidden">
+        <div class="p-6">
+            <button id="closeMobileMenu" class="absolute top-4 right-4 p-2 text-muted hover:text-fg" aria-label="Close"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <div class="mt-12 flex flex-col gap-4">
+                <a href="index.html" class="text-lg text-muted py-2 border-b border-border">Home</a>
+                <a href="products.html" class="text-lg text-muted py-2 border-b border-border">Products</a>
+                <a href="brands.html" class="text-lg text-muted py-2 border-b border-border">Brands</a>
+                <a href="compare.html" class="text-lg text-accent py-2 border-b border-border">Compare</a>
+                <a href="contact.html" class="text-lg text-muted py-2 border-b border-border">Contact</a>
+            </div>
+        </div>
+    </div>
+    <div id="menuOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+    <!-- Page Header -->
+    <section class="py-12 bg-surface border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-2 text-sm text-muted mb-4">
+                <a href="index.html" class="hover:text-accent transition-colors">Home</a>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <span class="text-fg">Compare</span>
+            </div>
+            <div class="flex items-end justify-between">
+                <div>
+                    <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl mb-2">COMPARE PRODUCTS</h1>
+                    <p class="text-muted max-w-2xl">Select up to 4 products to compare their features and specifications side by side.</p>
+                </div>
+                <button id="clearAllBtn" class="hidden sm:block btn-danger text-sm">Clear All</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compare Slots -->
+    <section class="py-12 lg:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12" id="compareSlots"></div>
+
+            <!-- Comparison Table -->
+            <div id="comparisonTable" class="hidden">
+                <h2 class="reveal font-display text-3xl sm:text-4xl mb-8">DETAILED COMPARISON</h2>
+                <div class="reveal reveal-delay-1 bg-card border border-border rounded-lg overflow-hidden">
+                    <div class="overflow-x-auto" id="tableContainer"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-bg border-t border-border py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 bg-accent rounded flex items-center justify-center"><svg class="w-6 h-6 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><span class="font-display text-2xl tracking-wider">FOTOLAB</span></div>
+                    <p class="text-muted text-sm max-w-md">Established in 1991, FOTOLAB has been providing premium photography equipment and expert services for over 30 years.</p>
+                </div>
+                <div><h4 class="font-medium mb-4">Quick Links</h4><ul class="space-y-2 text-sm text-muted"><li><a href="index.html" class="hover:text-accent transition-colors">Home</a></li><li><a href="products.html" class="hover:text-accent transition-colors">Products</a></li><li><a href="brands.html" class="hover:text-accent transition-colors">Brands</a></li><li><a href="compare.html" class="hover:text-accent transition-colors">Compare</a></li><li><a href="contact.html" class="hover:text-accent transition-colors">Contact</a></li></ul></div>
+                <div><h4 class="font-medium mb-4">Categories</h4><ul class="space-y-2 text-sm text-muted"><li><a href="products.html?cat=cameras" class="hover:text-accent transition-colors">Cameras</a></li><li><a href="products.html?cat=lenses" class="hover:text-accent transition-colors">Camera Lenses</a></li><li><a href="products.html?cat=audio" class="hover:text-accent transition-colors">Pro Audio</a></li><li><a href="products.html?cat=lighting" class="hover:text-accent transition-colors">Lighting & Studio</a></li><li><a href="products.html?cat=misc" class="hover:text-accent transition-colors">Accessories</a></li></ul></div>
+            </div>
+            <div class="section-divider mb-8"></div>
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted"><p>2026 FOTOLAB. All rights reserved.</p><p>Designed for photography enthusiasts worldwide</p></div>
+        </div>
+    </footer>
+
+    <script>
+        const products = [
+            { id:1, name:"Canon EOS R5", brand:"canon", category:"cameras", price:"389,990", image:"https://picsum.photos/seed/canon-r5/400/300", summary:"45MP Full-Frame Mirrorless Camera with 8K Video", features:{sensor:"45MP Full-Frame CMOS",video:"8K RAW, 4K 120fps",af:"1053-point Dual Pixel AF",iso:"100-51200",burst:"20 fps Electronic",weight:"738g"} },
+            { id:2, name:"Nikon Z8", brand:"nikon", category:"cameras", price:"349,990", image:"https://picsum.photos/seed/nikon-z8/400/300", summary:"45.7MP Full-Frame Mirrorless with 8K Video", features:{sensor:"45.7MP Full-Frame BSI CMOS",video:"8K 30fps, 4K 120fps",af:"493-point AF System",iso:"64-25600",burst:"20 fps",weight:"910g"} },
+            { id:3, name:"Sony Alpha A7 IV", brand:"sony", category:"cameras", price:"249,990", image:"https://picsum.photos/seed/sony-a7iv/400/300", summary:"33MP Full-Frame Hybrid Camera", features:{sensor:"33MP Full-Frame Exmor R",video:"4K 60fps, 10-bit 4:2:2",af:"759-point Phase Detection",iso:"100-51200",burst:"10 fps",weight:"658g"} },
+            { id:4, name:"Yashica MF-2", brand:"yashica", category:"cameras", price:"29,990", image:"https://picsum.photos/seed/yashica-mf2/400/300", summary:"Classic Film Camera Reissue", features:{sensor:"35mm Film",lens:"38mm f/2.8 Yashica Lens",focus:"Zone Focus",flash:"Built-in Flash",film:"35mm Format",weight:"340g"} },
+            { id:5, name:"Fujifilm X-T5", brand:"fuji", category:"cameras", price:"199,990", image:"https://picsum.photos/seed/fuji-xt5/400/300", summary:"40MP APS-C Mirrorless with Classic Design", features:{sensor:"40MP APS-C X-Trans CMOS 5",video:"6.2K 30fps, 4K 60fps",af:"425-point AF",iso:"80-51200",burst:"15 fps",weight:"557g"} },
+            { id:6, name:"Panasonic Lumix S5 II", brand:"panasonic", category:"cameras", price:"219,990", image:"https://picsum.photos/seed/pana-s5ii/400/300", summary:"24.2MP Full-Frame with Phase Detection AF", features:{sensor:"24.2MP Full-Frame CMOS",video:"6K 30fps, 4K 60fps",af:"779-point PDAF",iso:"100-51200",burst:"30 fps Electronic",weight:"740g"} },
+            { id:7, name:"Canon RF 24-70mm f/2.8L", brand:"canon", category:"lenses", price:"189,990", image:"https://picsum.photos/seed/canon-rf2470/400/300", summary:"Professional Standard Zoom Lens", features:{focal:"24-70mm",aperture:"f/2.8 Constant",mount:"Canon RF",stabilization:"IS up to 5 stops",elements:"21 Elements / 15 Groups",weight:"900g"} },
+            { id:8, name:"Sony FE 70-200mm f/2.8 GM II", brand:"sony", category:"lenses", price:"279,990", image:"https://picsum.photos/seed/sony-70200/400/300", summary:"Professional Telephoto Zoom", features:{focal:"70-200mm",aperture:"f/2.8 Constant",mount:"Sony E",stabilization:"Optical SteadyShot",elements:"17 Elements / 14 Groups",weight:"1045g"} },
+            { id:9, name:"Nikon Z 50mm f/1.2 S", brand:"nikon", category:"lenses", price:"209,990", image:"https://picsum.photos/seed/nikon-50/400/300", summary:"Ultra-Fast Prime Lens", features:{focal:"50mm",aperture:"f/1.2",mount:"Nikon Z",stabilization:"None",elements:"17 Elements / 12 Groups",weight:"1090g"} },
+            { id:10, name:"Rode VideoMic Pro+", brand:"canon", category:"audio", price:"24,990", image:"https://picsum.photos/seed/rode-vmp/400/300", summary:"Professional On-Camera Microphone", features:{type:"Shotgun Condenser",polar:"Super-Cardioid",frequency:"20Hz-20kHz",power:"Rechargeable Battery",connectivity:"3.5mm TRS",weight:"122g"} },
+            { id:11, name:"Zoom H6 Audio Recorder", brand:"sony", category:"audio", price:"34,990", image:"https://picsum.photos/seed/zoom-h6/400/300", summary:"6-Track Portable Recorder", features:{tracks:"6 Tracks",inputs:"4 XLR/TRS Combo",sample:"24-bit/96kHz",storage:"SD Card",battery:"4 AA Batteries",weight:"220g"} },
+            { id:12, name:"SanDisk Extreme PRO 256GB", brand:"canon", category:"memory", price:"12,990", image:"https://picsum.photos/seed/sandisk-256/400/300", summary:"CFexpress Type B Card", features:{capacity:"256GB",speed:"1700MB/s Read",write:"1400MB/s Write",type:"CFexpress Type B",rating:"VPG 400",warranty:"5 Years"} },
+            { id:13, name:"Sony CFA-G256 256GB", brand:"sony", category:"memory", price:"14,990", image:"https://picsum.photos/seed/sony-cfa/400/300", summary:"CFexpress Type A Card", features:{capacity:"256GB",speed:"800MB/s Read",write:"700MB/s Write",type:"CFexpress Type A",rating:"VPG 400",warranty:"5 Years"} },
+            { id:14, name:"Manfrotto 055 Carbon Fiber", brand:"canon", category:"tripods", price:"45,990", image:"https://picsum.photos/seed/manfrotto-055/400/300", summary:"Professional Carbon Fiber Tripod", features:{maxHeight:"170cm",minHeight:"9cm",load:"8kg",material:"Carbon Fiber",legs:"4-Section",weight:"1.7kg"} },
+            { id:15, name:"Peak Design Travel Tripod", brand:"sony", category:"tripods", price:"39,990", image:"https://picsum.photos/seed/peak-tripod/400/300", summary:"Compact Travel Tripod", features:{maxHeight:"152cm",minHeight:"14cm",load:"9kg",material:"Carbon Fiber",legs:"5-Section",weight:"1.27kg"} },
+            { id:16, name:"Godox AD600 Pro", brand:"nikon", category:"lighting", price:"79,990", image:"https://picsum.photos/seed/godox-ad600/400/300", summary:"600Ws Portable Studio Flash", features:{power:"600Ws",guide:"87m @ ISO 100",recycle:"0.01-0.9s",flash:"1/10000s T.1",battery:"500 Full Flashes",weight:"2.95kg"} },
+            { id:17, name:"Aputure 600d Pro", brand:"canon", category:"lighting", price:"99,990", image:"https://picsum.photos/seed/aputure-600/400/300", summary:"600W Daylight LED Fixture", features:{power:"600W",output:"Equivalent to 1200W HMI",cct:"5600K Daylight",cri:"96+ CRI/TLCI",dimming:"0-100%",weight:"5.1kg"} },
+            { id:18, name:"Peak Design Everyday Backpack", brand:"sony", category:"bags", price:"19,990", image:"https://picsum.photos/seed/peak-bag/400/300", summary:"30L Camera Backpack", features:{capacity:"30L",laptop:"16-inch",dividers:"Configurable",material:"Weatherproof Canvas",access:"Side & Rear",weight:"1.5kg"} },
+            { id:19, name:"Lowepro ProTactic BP 450 AW II", brand:"nikon", category:"bags", price:"15,990", image:"https://picsum.photos/seed/lowepro-bp/400/300", summary:"Professional Camera Backpack", features:{capacity:"2 Pro DSLR Bodies",laptop:"15-inch",dividers:"MaxFit System",material:"Weather Resistant",access:"4 Points",weight:"2.3kg"} },
+            { id:20, name:"Canon BG-E22 Battery Grip", brand:"canon", category:"misc", price:"29,990", image:"https://picsum.photos/seed/canon-grip/400/300", summary:"Battery Grip for EOS R5/R6", features:{compatible:"Canon EOS R5/R6",batteries:"2x LP-E6NH",controls:"Vertical Grip Controls",material:"Magnesium Alloy",weather:"Weather Sealed",weight:"190g"} },
+            { id:21, name:"Sony VG-C4EM Vertical Grip", brand:"sony", category:"misc", price:"34,990", image:"https://picsum.photos/seed/sony-grip/400/300", summary:"Vertical Grip for Alpha Series", features:{compatible:"Sony A7 IV/A7R IV",batteries:"2x NP-FZ100",controls:"Full Vertical Controls",material:"Magnesium Alloy",weather:"Dust/Moisture Resistant",weight:"215g"} },
+            { id:22, name:"Yashica Y35 Digifilm", brand:"yashica", category:"cameras", price:"19,990", image:"https://picsum.photos/seed/yashica-y35/400/300", summary:"Digital Camera with Film Simulation", features:{sensor:"14MP 1/2.3-inch",lens:"35mm f/2.8 Equivalent",film:"Digital Film Simulation",iso:"100-1600",screen:"2.4-inch LCD",weight:"180g"} }
+        ];
+
+        let compareList = JSON.parse(sessionStorage.getItem('fotolabCompare') || '[]');
+        const slotsContainer = document.getElementById('compareSlots');
+        const comparisonTable = document.getElementById('comparisonTable');
+        const tableContainer = document.getElementById('tableContainer');
+
+        function getAvailableProducts(slotIndex) {
+            const selectedIds = compareList.filter((_, i) => i !== slotIndex);
+            return products.filter(p => !selectedIds.includes(p.id));
+        }
+
+        function renderSlots() {
+            slotsContainer.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const product = compareList[i];
+                const slot = document.createElement('div');
+                slot.className = `reveal reveal-delay-${i+1} compare-slot ${product ? 'filled' : ''}`;
+
+                if (product) {
+                    slot.innerHTML = `
+                        <div class="remove-slot" onclick="removeSlot(${i})" title="Remove">
+                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </div>
+                        <div class="w-full">
+                            <div class="aspect-[4/3] overflow-hidden rounded-t-lg"><img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover"></div>
+                        </div>
+                        <div class="p-5 w-full text-center">
+                            <span class="bg-accent text-bg text-xs font-medium px-2 py-1 rounded uppercase">${product.brand}</span>
+                            <h3 class="font-semibold text-lg mt-2 mb-1">${product.name}</h3>
+                            <p class="text-muted text-sm mb-2">${product.summary}</p>
+                            <div class="text-accent font-display text-2xl">Rs. ${product.price}</div>
+                        </div>
+                    `;
+                } else {
+                    const available = getAvailableProducts(i);
+                    slot.innerHTML = `
+                        <div class="dropdown w-full h-full flex flex-col items-center justify-center p-6">
+                            <svg class="w-12 h-12 text-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                            <p class="text-muted mb-3">Add Product</p>
+                            <button class="btn-secondary text-sm" onclick="toggleDropdown(this, ${i})">Select Product</button>
+                            <div class="dropdown-menu" id="dropdown-${i}">
+                                ${available.length > 0 ? available.map(p => `
+                                    <div class="dropdown-item" onclick="addToSlot(${i}, ${p.id})">
+                                        <img src="${p.image}" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                                        <div><div class="font-medium text-sm">${p.name}</div><div class="text-xs text-muted">Rs. ${p.price}</div></div>
+                                    </div>
+                                `).join('') : '<div class="p-4 text-center text-muted text-sm">All products selected</div>'}
+                            </div>
+                        </div>
+                    `;
+                }
+                slotsContainer.appendChild(slot);
+            }
+            initScrollReveal();
+            renderTable();
+        }
+
+        function toggleDropdown(btn, slotIndex) {
+            const menu = document.getElementById(`dropdown-${slotIndex}`);
+            document.querySelectorAll('.dropdown-menu').forEach(m => { if(m.id !== `dropdown-${slotIndex}`) m.classList.remove('open'); });
+            menu.classList.toggle('open');
+        }
+
+        function addToSlot(slotIndex, productId) {
+            compareList[slotIndex] = productId;
+            sessionStorage.setItem('fotolabCompare', JSON.stringify(compareList));
+            renderSlots();
+        }
+
+        function removeSlot(slotIndex) {
+            compareList.splice(slotIndex, 1);
+            sessionStorage.setItem('fotolabCompare', JSON.stringify(compareList));
+            renderSlots();
+        }
+
+        function renderTable() {
+            const filledProducts = compareList.map(id => products.find(p => p.id === id)).filter(Boolean);
+            if (filledProducts.length < 2) {
+                comparisonTable.classList.add('hidden');
+                return;
+            }
+            comparisonTable.classList.remove('hidden');
+
+            const allKeys = new Set();
+            filledProducts.forEach(p => Object.keys(p.features).forEach(k => allKeys.add(k)));
+
+            tableContainer.innerHTML = `
+                <table class="compare-table w-full min-w-[600px]">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Specification</th>
+                            ${filledProducts.map(p => `
+                                <th class="text-center">
+                                    <div class="flex flex-col items-center gap-1">
+                                        <img src="${p.image}" class="w-16 h-12 rounded object-cover">
+                                        <span class="text-sm">${p.name}</span>
+                                    </div>
+                                </th>
+                            `).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Price</td>
+                            ${filledProducts.map(p => `<td class="text-accent font-semibold">Rs. ${p.price}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td>Category</td>
+                            ${filledProducts.map(p => `<td class="capitalize">${p.category.replace('_',' ')}</td>`).join('')}
+                        </tr>
+                        ${[...allKeys].map(key => `
+                            <tr>
+                                <td class="capitalize">${key.replace(/([A-Z])/g, ' $1')}</td>
+                                ${filledProducts.map(p => `<td>${p.features[key] || '—'}</td>`).join('')}
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        document.getElementById('clearAllBtn').addEventListener('click', () => {
+            compareList = [];
+            sessionStorage.setItem('fotolabCompare', '[]');
+            renderSlots();
+        });
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));
+            }
+        });
+
+        // Scroll Reveal
+        function initScrollReveal() {
+            const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('active'); }); }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+            document.querySelectorAll('.reveal:not(.active)').forEach(el => obs.observe(el));
+        }
+
+        // Mobile Menu
+        const mobileMenu = document.getElementById('mobileMenu');
+        const overlay = document.getElementById('menuOverlay');
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => { mobileMenu.classList.add('open'); overlay.classList.remove('hidden'); });
+        document.getElementById('closeMobileMenu').addEventListener('click', () => { mobileMenu.classList.remove('open'); overlay.classList.add('hidden'); });
+        overlay.addEventListener('click', () => { mobileMenu.classList.remove('open'); overlay.classList.add('hidden'); });
+        mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { mobileMenu.classList.remove('open'); overlay.classList.add('hidden'); }));
+
+        renderSlots();
+    </script>
+</body>
+</html>
