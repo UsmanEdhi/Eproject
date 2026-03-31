@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brands - FOTOLAB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { bg:'#0a0a0a', surface:'#141414', card:'#1a1a1a', border:'#2a2a2a', accent:'#d4a853', accentDark:'#b8923f', muted:'#888888', fg:'#f5f5f5' },
+                    fontFamily: { display:['Bebas Neue','sans-serif'], body:['Inter','sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root { --bg:#0a0a0a;--surface:#141414;--card:#1a1a1a;--border:#2a2a2a;--accent:#d4a853;--accent-dark:#b8923f;--muted:#888888;--fg:#f5f5f5; }
+        * { scrollbar-width:thin; scrollbar-color:var(--accent) var(--surface); }
+        html { scroll-behavior:smooth; }
+        @media (prefers-reduced-motion:reduce) { html{scroll-behavior:auto;} *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;} }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
+        .font-display { font-family:'Bebas Neue',sans-serif; }
+
+        .reveal { opacity:0; transform:translateY(40px); transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1),transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.active { opacity:1; transform:translateY(0); }
+        .reveal-delay-1{transition-delay:0.1s;} .reveal-delay-2{transition-delay:0.2s;} .reveal-delay-3{transition-delay:0.3s;} .reveal-delay-4{transition-delay:0.4s;} .reveal-delay-5{transition-delay:0.5s;}
+
+        .brand-hero {
+            position: relative; overflow: hidden; border-radius: 12px;
+            border: 1px solid var(--border); transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            cursor: pointer; background: var(--card);
+        }
+        .brand-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(212,168,83,0.15) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.4s ease; z-index: 1;
+        }
+        .brand-hero:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 16px 40px -12px rgba(212,168,83,0.25); }
+        .brand-hero:hover::before { opacity: 1; }
+        .brand-hero:hover .brand-img { transform: scale(1.08); }
+        .brand-img { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
+
+        .btn-primary { background:linear-gradient(135deg,var(--accent) 0%,var(--accent-dark) 100%); color:var(--bg); font-weight:600; padding:12px 28px; border-radius:4px; transition:all 0.3s ease; position:relative; overflow:hidden; display:inline-block; text-decoration:none; border:none; cursor:pointer; }
+        .btn-primary::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent); transition:left 0.5s ease; }
+        .btn-primary:hover::before { left:100%; }
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px -8px var(--accent); }
+
+        .btn-secondary { background:transparent; border:1px solid var(--accent); color:var(--accent); padding:10px 24px; border-radius:4px; transition:all 0.3s ease; display:inline-block; text-decoration:none; cursor:pointer; }
+        .btn-secondary:hover { background:var(--accent); color:var(--bg); }
+
+        .nav-link { position:relative; padding:8px 0; transition:color 0.3s ease; text-decoration:none; }
+        .nav-link::after { content:''; position:absolute; bottom:0; left:0; width:0; height:2px; background:var(--accent); transition:width 0.3s ease; }
+        .nav-link:hover { color:var(--accent); }
+        .nav-link:hover::after { width:100%; }
+
+        .mobile-menu { transform:translateX(100%); transition:transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+        .mobile-menu.open { transform:translateX(0); }
+
+        .modal { opacity:0; visibility:hidden; transition:all 0.3s ease; }
+        .modal.open { opacity:1; visibility:visible; }
+        .modal-content { transform:scale(0.95) translateY(20px); transition:transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+        .modal.open .modal-content { transform:scale(1) translateY(0); }
+
+        .section-divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); }
+        button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    </style>
+</head>
+<body class="min-h-screen pt-16 lg:pt-20">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-bg/90 backdrop-blur-md border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 lg:h-20">
+                <a href="index.html" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-accent rounded flex items-center justify-center">
+                        <svg class="w-6 h-6 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <span class="font-display text-2xl lg:text-3xl tracking-wider text-fg">FOTOLAB</span>
+                </a>
+                <div class="hidden lg:flex items-center gap-8">
+                    <a href="index.html" class="nav-link text-muted">Home</a>
+                    <a href="products.html" class="nav-link text-muted">Products</a>
+                    <a href="brands.html" class="nav-link text-accent">Brands</a>
+                    <a href="compare.html" class="nav-link text-muted">Compare</a>
+                    <a href="contact.html" class="nav-link text-muted">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="products.html" class="hidden sm:block btn-primary text-sm">Browse Catalog</a>
+                    <button id="mobileMenuBtn" class="lg:hidden p-2 text-fg" aria-label="Toggle menu"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div id="mobileMenu" class="mobile-menu fixed inset-y-0 right-0 w-72 bg-surface z-50 lg:hidden">
+        <div class="p-6">
+            <button id="closeMobileMenu" class="absolute top-4 right-4 p-2 text-muted hover:text-fg" aria-label="Close"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <div class="mt-12 flex flex-col gap-4">
+                <a href="index.html" class="text-lg text-muted py-2 border-b border-border">Home</a>
+                <a href="products.html" class="text-lg text-muted py-2 border-b border-border">Products</a>
+                <a href="brands.html" class="text-lg text-accent py-2 border-b border-border">Brands</a>
+                <a href="compare.html" class="text-lg text-muted py-2 border-b border-border">Compare</a>
+                <a href="contact.html" class="text-lg text-muted py-2 border-b border-border">Contact</a>
+            </div>
+        </div>
+    </div>
+    <div id="menuOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
+    <!-- Page Header -->
+    <section class="py-12 bg-surface border-b border-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-2 text-sm text-muted mb-4">
+                <a href="index.html" class="hover:text-accent transition-colors">Home</a>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <span class="text-fg">Brands</span>
+            </div>
+            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl mb-2">TRUSTED BRANDS</h1>
+            <p class="text-muted max-w-2xl">We partner with the world's leading photography brands to bring you the best equipment available.</p>
+        </div>
+    </section>
+
+    <!-- Brands Grid -->
+    <section class="py-16 lg:py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="brandsGrid"></div>
+        </div>
+    </section>
+
+    <!-- Brand Detail Modal -->
+    <div id="brandModal" class="modal fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80" onclick="closeBrandModal()"></div>
+        <div class="modal-content bg-card border border-border rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+            <button onclick="closeBrandModal()" class="absolute top-4 right-4 p-2 text-muted hover:text-fg z-10" aria-label="Close"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <div id="brandModalContent" class="p-8"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-bg border-t border-border py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-accent rounded flex items-center justify-center"><svg class="w-6 h-6 text-bg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                        <span class="font-display text-2xl tracking-wider">FOTOLAB</span>
+                    </div>
+                    <p class="text-muted text-sm max-w-md">Established in 1991, FOTOLAB has been providing premium photography equipment and expert services for over 30 years.</p>
+                </div>
+                <div><h4 class="font-medium mb-4">Quick Links</h4><ul class="space-y-2 text-sm text-muted"><li><a href="index.html" class="hover:text-accent transition-colors">Home</a></li><li><a href="products.html" class="hover:text-accent transition-colors">Products</a></li><li><a href="brands.html" class="hover:text-accent transition-colors">Brands</a></li><li><a href="compare.html" class="hover:text-accent transition-colors">Compare</a></li><li><a href="contact.html" class="hover:text-accent transition-colors">Contact</a></li></ul></div>
+                <div><h4 class="font-medium mb-4">Categories</h4><ul class="space-y-2 text-sm text-muted"><li><a href="products.html?cat=cameras" class="hover:text-accent transition-colors">Cameras</a></li><li><a href="products.html?cat=lenses" class="hover:text-accent transition-colors">Camera Lenses</a></li><li><a href="products.html?cat=audio" class="hover:text-accent transition-colors">Pro Audio</a></li><li><a href="products.html?cat=lighting" class="hover:text-accent transition-colors">Lighting & Studio</a></li><li><a href="products.html?cat=misc" class="hover:text-accent transition-colors">Accessories</a></li></ul></div>
+            </div>
+            <div class="section-divider mb-8"></div>
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted">
+                <p>2026 FOTOLAB. All rights reserved.</p><p>Designed for photography enthusiasts worldwide</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const brands = [
+            { id:'canon', name:'Canon', slug:'canon', tagline:'Power of Precision', description:'Canon Inc. is a Japanese multinational corporation specializing in optical, imaging, and industrial products. Known for their EOS line of cameras and EF/RF lens systems, Canon has been a leader in photography since 1937.', founded:1937, country:'Japan', image:'https://picsum.photos/seed/brand-canon/600/400', productCount:5, categories:['Cameras','Lenses','Accessories'] },
+            { id:'nikon', name:'Nikon', slug:'nikon', tagline:'See Beyond', description:'Nikon Corporation is a Japanese multinational company known for its optics and imaging products. The Z-series mirrorless cameras and Nikkor lenses are celebrated for their exceptional image quality and build.', founded:1917, country:'Japan', image:'https://picsum.photos/seed/brand-nikon/600/400', productCount:4, categories:['Cameras','Lenses','Lighting','Bags'] },
+            { id:'sony', name:'Sony', slug:'sony', tagline:'Be Moved', description:'Sony Corporation is a global leader in consumer electronics. Their Alpha series mirrorless cameras have revolutionized the industry with cutting-edge autofocus technology and compact full-frame designs.', founded:1946, country:'Japan', image:'https://picsum.photos/seed/brand-sony/600/400', productCount:5, categories:['Cameras','Lenses','Audio','Memory','Tripods','Bags','Accessories'] },
+            { id:'fuji', name:'Fujifilm', slug:'fuji', tagline:'Made for Makers', description:'Fujifilm Holdings Corporation is known for their X-series and GFX-series cameras that combine modern sensor technology with classic film-inspired color science and retro design aesthetics.', founded:1934, country:'Japan', image:'https://picsum.photos/seed/brand-fuji/600/400', productCount:1, categories:['Cameras'] },
+            { id:'yashica', name:'Yashica', slug:'yashica', tagline:'Film Never Dies', description:'Yashica is a legendary camera brand originally founded in Japan in 1949. Known for iconic film cameras like the Electro 35 and Yashica-Mat TLR, the brand has been revived with modern digital-film hybrid cameras.', founded:1949, country:'Japan', image:'https://picsum.photos/seed/brand-yashica/600/400', productCount:2, categories:['Cameras'] },
+            { id:'panasonic', name:'Panasonic', slug:'panasonic', tagline:'Life is Better When You Create', description:'Panasonic Corporation produces the Lumix line of mirrorless cameras renowned for their exceptional video capabilities, advanced autofocus, and value-for-money full-frame and Micro Four Thirds systems.', founded:1918, country:'Japan', image:'https://picsum.photos/seed/brand-pana/600/400', productCount:1, categories:['Cameras'] }
+        ];
+
+        const brandsGrid = document.getElementById('brandsGrid');
+        brandsGrid.innerHTML = brands.map((b, i) => `
+            <div class="reveal reveal-delay-${(i%3)+1} brand-hero" onclick="openBrandModal('${b.id}')">
+                <div class="aspect-[3/2] overflow-hidden">
+                    <img src="${b.image}" alt="${b.name}" class="brand-img w-full h-full object-cover">
+                </div>
+                <div class="relative z-10 p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="font-display text-3xl">${b.name.toUpperCase()}</span>
+                        <span class="text-xs text-muted bg-surface px-2 py-1 rounded">Since ${b.founded}</span>
+                    </div>
+                    <p class="text-accent text-sm italic mb-3">"${b.tagline}"</p>
+                    <p class="text-muted text-sm line-clamp-2 mb-4">${b.description}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-2 flex-wrap">
+                            ${b.categories.slice(0,3).map(c => `<span class="text-xs bg-bg/50 px-2 py-1 rounded border border-border">${c}</span>`).join('')}
+                        </div>
+                        <span class="text-xs text-muted">${b.productCount} Products</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        function openBrandModal(id) {
+            const b = brands.find(br => br.id === id);
+            if (!b) return;
+            document.getElementById('brandModalContent').innerHTML = `
+                <div class="aspect-video rounded-lg overflow-hidden mb-6"><img src="${b.image}" alt="${b.name}" class="w-full h-full object-cover"></div>
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="font-display text-4xl">${b.name.toUpperCase()}</span>
+                    <span class="text-xs text-muted bg-surface px-2 py-1 rounded">Since ${b.founded}</span>
+                </div>
+                <p class="text-accent text-sm italic mb-4">"${b.tagline}"</p>
+                <p class="text-muted mb-6">${b.description}</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-surface p-4 rounded text-center"><div class="text-xs text-muted mb-1">Founded</div><div class="font-semibold">${b.founded}</div></div>
+                    <div class="bg-surface p-4 rounded text-center"><div class="text-xs text-muted mb-1">Country</div><div class="font-semibold">${b.country}</div></div>
+                    <div class="bg-surface p-4 rounded text-center"><div class="text-xs text-muted mb-1">Products</div><div class="font-semibold">${b.productCount}</div></div>
+                    <div class="bg-surface p-4 rounded text-center"><div class="text-xs text-muted mb-1">Categories</div><div class="font-semibold">${b.categories.length}</div></div>
+                </div>
+                <div class="mb-6">
+                    <h3 class="font-medium mb-3">Available Categories</h3>
+                    <div class="flex flex-wrap gap-2">${b.categories.map(c => `<a href="products.html?cat=${c.toLowerCase().replace(/ & /g,'').replace(/ /g,'_')}" class="text-sm bg-surface border border-border px-3 py-2 rounded hover:border-accent hover:text-accent transition-colors">${c}</a>`).join('')}</div>
+                </div>
+                <a href="products.html?brand=${b.id}" class="btn-primary inline-flex items-center gap-2">
+                    View ${b.name} Products
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
+            `;
+            document.getElementById('brandModal').classList.add('open');
+        }
+
+        function closeBrandModal() { document.getElementById('brandModal').classList.remove('open'); }
+
+        // Scroll Reveal
+        const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('active'); }); }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        document.querySelectorAll('.reveal:not(.active)').forEach(el => obs.observe(el));
+
+        // Mobile Menu
+        const mobileMenu = document.getElementById('mobileMenu');
+        const overlay = document.getElementById('menuOverlay');
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => { mobileMenu.classList.add('open'); overlay.classList.remove('hidden'); });
+        document.getElementById('closeMobileMenu').addEventListener('click', () => { mobileMenu.classList.remove('open'); overlay.classList.add('hidden'); });
+        overlay.addEventListener('click', () => { mobileMenu.classList.remove('open'); overlay.classList.add('hidden'); });
+        mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { mobileMenu.classList.remove('open'); overlay.classList.add('hidden'); }));
+
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') closeBrandModal(); });
+    </script>
+</body>
+</html>
